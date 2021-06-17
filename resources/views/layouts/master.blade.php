@@ -10,9 +10,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LMS</title>
   <link href="{{ asset('css/app.css') }}" rel="stylesheet" />
+  <!-- CSRF Token -->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="hold-transition sidebar-mini" >
+<div class="wrapper" id="app">
 
   <!-- Navbar -->
   <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -24,10 +27,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
       
     </ul>
 
-    <!-- Right navbar links -->
-    <ul class="navbar-nav ml-auto">
-      
-    </ul>
+    <div class="input-group input-group-sm">
+      <input class="form-control form-control-navbar" @keyup="searchit" v-model="search" type="search" placeholder="Search" aria-label="Search">
+      <div class="input-group-append">
+        <button class="btn btn-navbar" @click="searchit">
+          <i class="fa fa-search"></i>
+        </button>
+      </div>
+    </div>
   </nav>
   <!-- /.navbar -->
 
@@ -49,6 +56,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <div class="info">
           <a href="#" class="d-block">
             {{ Auth::user()->name }}
+            <p>{{ Auth::user()->role }}</p>
           </a>
         </div>
       </div>
@@ -62,51 +70,52 @@ scratch. This page gets rid of all links and provides the needed markup only.
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <router-link to="/dashboard" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>
                 Dashboard
               </p>
-            </a>
+            </router-link>
+          </li>
+          @can('admin')
+          <li class="nav-item">
+            <router-link to="/users" class="nav-link">
+              <i class="fa fa-users nav-icon"></i>
+              <p>Users</p>
+            </router-link>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link active">
-              <i class="nav-icon fas fa-cog"></i>
-              <p>
-                Management
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="#" class="nav-link active">
-                  <i class="fa fa-circle nav-icon"></i>
-                  <p>Active Page</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="fa fa-circle nav-icon"></i>
-                  <p>Inactive Page</p>
-                </a>
-              </li>
-            </ul>
+            <router-link to="/leads" class="nav-link">
+              <i class="fa fa-poll nav-icon"></i>
+              <p>Find Leads</p>
+            </router-link>
           </li>
+          {{-- <li class="nav-item">
+            <router-link to="/departments" class="nav-link">
+              <i class="fa fa-users nav-icon"></i>
+              <p>Departments</p>
+            </router-link>
+          </li> --}}
+          @endcan
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <router-link to="/profile" class="nav-link">
               <i class="nav-icon fas fa-user"></i>
               <p>
                 Profile
               </p>
-            </a>
+            </router-link>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-power-off"></i>
-              <p>
-                Logout
-              </p>
-            </a>
+              <a class="nav-link" href="{{ route('logout') }}"
+                  onclick="event.preventDefault();
+                                document.getElementById('logout-form').submit();">
+                  <i class="nav-icon fas fa-power-off"></i>
+                  <p>{{ __('Logout') }}</p>
+              </a>
+
+              <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                  @csrf
+              </form>
           </li>
         </ul>
       </nav>
@@ -121,10 +130,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Main content -->
     <div class="content">
       <div class="container-fluid">
-        <div class="row">
- 
-        </div>
-        <!-- /.row -->
+          <router-view></router-view>
+          <vue-progress-bar></vue-progress-bar>
       </div><!-- /.container-fluid -->
     </div>
     <!-- /.content -->
@@ -152,7 +159,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
   </footer>
 </div>
 <!-- ./wrapper -->
-
+<script>
+  @auth
+    window.user = @json(auth()->user())
+  @endauth
+</script>
 <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>
